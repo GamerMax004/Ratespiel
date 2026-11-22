@@ -1,6 +1,6 @@
 // Quiz-App ohne Abhängigkeiten: node server.js  (Port 3000, ADMIN_PASSWORD per Umgebungsvariable)
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
-const PORT = process.env.PORT || 3000, ADMIN_PW = process.env.ADMIN_PASSWORD || 'admin';
+const PORT = process.env.PORT || 3000, ADMIN_PW = (process.env.ADMIN_PASSWORD || 'admin').trim();
 const DB = path.join(process.env.DATA_DIR || __dirname, 'data.json');
 let S = { groups: [], rounds: [], live: { phase: 'idle', roundId: null, answers: {}, results: {} } };
 try { S = JSON.parse(fs.readFileSync(DB, 'utf8')); } catch {}
@@ -55,7 +55,7 @@ http.createServer(async (req, res) => {
   if (req.method === 'POST') {
     const b = await body(req);
     if (u.pathname === '/api/login') {
-      if (b.code === ADMIN_PW) { const t = crypto.randomUUID(); tokens.add(t); return json(res, { role: 'admin', token: t }); }
+      if (String(b.code || '').trim() === ADMIN_PW) { const t = crypto.randomUUID(); tokens.add(t); return json(res, { role: 'admin', token: t }); }
       const g = S.groups.find(x => x.code === String(b.code).trim()); return g ? json(res, { role: 'group', g: g.id }) : json(res, { error: 'Code unbekannt' }, 404);
     }
     if (u.pathname === '/api/answer') {
