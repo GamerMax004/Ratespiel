@@ -28,10 +28,10 @@ let st=null,tab='dash',draft=null,typed={};
 const post=(u,b)=>fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
 const adm=(action,x={})=>post('/api/admin',{token:sess.token,action,...x});
 function login(){app.innerHTML=`<div class="card center"><h1>Quiz</h1><p class="mu">Gruppencode oder Admin-Passwort eingeben</p>
-<div class="row" style="max-width:420px;margin:auto"><input id="c" type="text" inputmode="text" style="font-size:20px" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Code"><button id="go">Los</button></div><p id="err" class="mu"></p><p class="mu" style="font-size:12px">Version 3</p></div>`;
+<div class="row" style="max-width:420px;margin:auto"><input id="c" type="text" inputmode="text" style="font-size:20px" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Code"><button id="go">Los</button></div><p id="err" class="mu"></p><p class="mu" style="font-size:12px">Version 4</p></div>`;
  const go=async()=>{const r=await post('/api/login',{code:$('#c').value});if(r.error)return $('#err').textContent=r.error;
   sess=r;try{localStorage.setItem('quiz',JSON.stringify(r))}catch{}connect()};
- $('#go').onclick=go;$('#c').onkeydown=e=>e.key==='Enter'&&go()}
+ $('#go').onclick=go;$('#c').onkeydown=e=>{if(e.key==='Enter')go()}}
 function connect(){if(!sess)return login();const es=new EventSource('/api/events?'+(sess.role==='admin'?'t='+sess.token:'g='+sess.g));
  es.onmessage=e=>{st=JSON.parse(e.data);if(st.gone||(sess.role==='admin'&&!st.groups))return logout();render()}}
 function logout(){try{localStorage.removeItem('quiz')}catch{}location.reload()}
